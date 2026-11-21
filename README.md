@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/Meppies/ha-brager-one/main/custom_components/brager_one/brand/icon.png" alt="" width="96" align="right">
+
 # BragerOne for Home Assistant
 
 [![Validate](https://github.com/Meppies/ha-brager-one/actions/workflows/validate.yml/badge.svg)](https://github.com/Meppies/ha-brager-one/actions/workflows/validate.yml)
