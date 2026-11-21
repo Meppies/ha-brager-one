@@ -24,7 +24,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .api import BragerOneSnapshot, ParameterValue
-from .const import OPERATING_STATES
+from .const import OPERATING_STATES, operating_state_code
 from .coordinator import BragerOneConfigEntry, BragerOneCoordinator
 from .entity import BragerOneEntity
 
@@ -38,6 +38,11 @@ def _number(value: ParameterValue | None) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _state_code(value: ParameterValue | None) -> float | None:
+    code = operating_state_code(value)
+    return None if code is None else float(code)
 
 
 def _tenths(value: ParameterValue | None) -> float | None:
@@ -127,8 +132,9 @@ SENSORS: tuple[BragerOneSensorDescription, ...] = (
         key="operating_state_code",
         translation_key="operating_state_code",
         pool="P5",
-        parameter="s10",
+        parameter="s5",
         entity_category=EntityCategory.DIAGNOSTIC,
+        convert=_state_code,
     ),
 )
 
@@ -146,7 +152,7 @@ async def async_setup_entry(
         for description in SENSORS
         if snapshot.value(description.pool, description.parameter) is not None
     ]
-    if snapshot.value("P5", "s10") is not None:
+    if snapshot.value("P5", "s5") is not None:
         entities.append(BragerOneOperatingStateSensor(coordinator))
     entities.append(BragerOneAlarmSensor(coordinator))
     entities.append(BragerOneLastAlarmSensor(coordinator))
@@ -190,10 +196,8 @@ class BragerOneOperatingStateSensor(BragerOneEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         """Return the state, or None for a code that is not mapped yet."""
-        code = self.coordinator.data.value("P5", "s10")
-        if isinstance(code, bool) or not isinstance(code, int):
-            return None
-        return OPERATING_STATES.get(code)
+        code = operating_state_code(self.coordinator.data.value("P5", "s5"))
+        return None if code is None else OPERATING_STATES.get(code)
 
 
 def _alarm_details(

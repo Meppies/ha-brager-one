@@ -26,6 +26,8 @@ const TEXT = {
     unknown: "unknown",
     state_standby: "Standby",
     state_work: "Work",
+    state_damping: "Damping",
+    state_cleaning: "Cleaning",
     state_code: "State code {code}",
     no_alarms: "No active alarms",
     active_alarm_one: "1 active alarm",
@@ -65,6 +67,8 @@ const TEXT = {
     unknown: "onbekend",
     state_standby: "Stand-by",
     state_work: "In bedrijf",
+    state_damping: "Doven",
+    state_cleaning: "Reinigen",
     state_code: "Toestandscode {code}",
     no_alarms: "Geen actieve alarmen",
     active_alarm_one: "1 actief alarm",
@@ -265,9 +269,10 @@ class BragerOneCard extends HTMLElement {
     const code = this._state(map, "operating_state_code");
     let label;
     let icon = "mdi:help-circle-outline";
-    if (state && ["standby", "work"].includes(state.state)) {
+    const icons = { work: "mdi:play-circle-outline", damping: "mdi:fire-alert", cleaning: "mdi:broom", standby: "mdi:pause-circle-outline" };
+    if (state && icons[state.state]) {
       label = this._t(`state_${state.state}`);
-      icon = state.state === "work" ? "mdi:play-circle-outline" : "mdi:pause-circle-outline";
+      icon = icons[state.state];
     } else if (code && !["unknown", "unavailable"].includes(code.state)) {
       label = this._t("state_code", { code: this._number(code.state, 0) });
     } else {

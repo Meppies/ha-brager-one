@@ -34,12 +34,24 @@ PENDING_TIMEOUT: Final = timedelta(seconds=45)
 COMMAND_BOILER_START: Final = "BOILER_START"
 COMMAND_BOILER_STOP: Final = "BOILER_STOP"
 
-# Operating state word P5 s10, as shown by the BragerOne app. Only the values
-# below have been seen; others are reported as unknown with the raw code.
+# The operating state is bits 8-11 of status word P5 s5, matched against the
+# BragerOne app: cleaning 0x0100, work 0x5300, damping 0x0400, standby 0x0500.
+# Codes not seen yet are reported as unknown, with the number in the
+# diagnostic code sensor.
 OPERATING_STATES: Final[dict[int, str]] = {
-    1: "standby",
+    1: "cleaning",
     3: "work",
+    4: "damping",
+    5: "standby",
 }
+
+
+def operating_state_code(word: object) -> int | None:
+    """Extract the operating state code from status word P5 s5."""
+    if isinstance(word, bool) or not isinstance(word, int):
+        return None
+    return (word >> 8) & 0x0F
+
 
 # Alarm texts live in translations/<language>.json under
 # selector.alarm.options.<code>, so they follow the Home Assistant language.

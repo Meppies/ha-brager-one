@@ -58,7 +58,7 @@ async def test_sensors(
         "sensor.pellet_stove_flame_brightness": "0.0",
         "sensor.pellet_stove_burner_power": "12.5",
         "sensor.pellet_stove_blower_output": "40.0",
-        "sensor.pellet_stove_operating_state_code": "1.0",
+        "sensor.pellet_stove_operating_state_code": "5.0",
         "sensor.pellet_stove_operating_state": "standby",
         "sensor.pellet_stove_last_alarm": "2026-11-16T20:55:30+00:00",
         "sensor.pellet_stove_active_alarms": "0",
@@ -102,7 +102,7 @@ async def test_sensor_odd_values(
     mock_api(
         aioclient_mock,
         parameters=_params_with(
-            P4={"v0": "n/a", "v14": True}, P5={"s0": "x", "s10": 7}
+            P4={"v0": "n/a", "v14": True}, P5={"s0": "x", "s5": 0x0700}
         ),
         history={"alarms": {"data": []}},
     )
@@ -308,3 +308,29 @@ async def test_diagnostics_redacts(
     assert DEVID not in dumped
     assert result["parameters"]["P4"]["v0"] == 78
     assert result["module"]["gateway_version"] == "V2.09"
+
+
+@pytest.mark.parametrize(
+    ("word", "expected"),
+    [
+        (0x0500, ("standby", "5.0")),
+        (0x5300, ("work", "3.0")),
+        (0x0400, ("damping", "4.0")),
+        (0x0100, ("cleaning", "1.0")),
+        (0x0200, ("unknown", "2.0")),
+        ("x", ("unknown", "unknown")),
+    ],
+)
+async def test_operating_state_from_status_word(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    word: object,
+    expected: tuple[str, str],
+) -> None:
+    """The state comes from bits 8-11 of P5 s5, as matched against the app."""
+    state, code = expected
+    mock_api(aioclient_mock, parameters=_params_with(P5={"s5": word}))
+    await setup_integration(hass, mock_entry)
+    assert hass.states.get("sensor.pellet_stove_operating_state").state == state
+    assert hass.states.get("sensor.pellet_stove_operating_state_code").state == code

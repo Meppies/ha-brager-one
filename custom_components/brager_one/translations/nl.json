@@ -139,7 +139,9 @@
         "name": "Bedrijfstoestand",
         "state": {
           "standby": "Stand-by",
-          "work": "In bedrijf"
+          "work": "In bedrijf",
+          "damping": "Doven",
+          "cleaning": "Reinigen"
         }
       },
       "active_alarms": {

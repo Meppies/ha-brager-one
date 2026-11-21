@@ -54,10 +54,10 @@ To use another account or a new password, open the entry and choose **Reconfigur
 | Flame brightness | sensor | P4 v13 (%) | enabled |
 | Burner power | sensor | P4 v14 (kW, reported in tenths) | enabled |
 | Blower output | sensor | P4 v15 (%) | enabled |
-| Operating state | sensor (enum) | P5 s10: `standby` (1) or `work` (3), unknown for other codes | enabled |
+| Operating state | sensor (enum) | bits 8-11 of P5 s5: `cleaning` (1), `work` (3), `damping` (4) or `standby` (5); unknown for other codes | enabled |
 | Active alarms | sensor | number of active alarms, with code, description, start and end as attributes | enabled |
 | Last alarm | sensor (timestamp) | start of the most recent alarm; attributes hold its code, description, end and the ten most recent alarms | enabled |
-| Operating state code | sensor (diagnostic) | raw state code P5 s10 | enabled |
+| Operating state code | sensor (diagnostic) | the state number from P5 s5, also for states not named yet | enabled |
 | Boiler pump, Return pump, Hot water pump | binary sensor | P5 s11, s12, s19 | enabled |
 | Hot water, outdoor, mixing valve 1, buffer and flue gas temperature | sensor | P4 v2, v4, v5, v6, v7 | disabled |
 | Fuel level, oxygen in flue gas | sensor | P4 v8, v16 | disabled |
@@ -138,7 +138,7 @@ automation:
 ## Known limitations
 
 - BragerOne has no official API. A change on Brager's side can break the integration without warning.
-- The operating state codes are not documented. Only 1 ("Standby") and 3 ("Work") have been matched against the BragerOne app so far; other phases such as ignition, cleaning or extinguishing show as unknown, with the raw number in the diagnostic code sensor. Open an issue with the code and what the app shows to get one added.
+- The operating state codes are not documented. Only 1 ("Cleaning"), 3 ("Work"), 4 ("Damping") and 5 ("Standby") have been matched against the BragerOne app so far; other phases such as ignition show as unknown, with the raw number in the diagnostic code sensor. Open an issue with the code and what the app shows to get one added.
 - Pump states: 3 is "on" and 0 or 1 is "off" in the app. Other values show as unknown.
 - Burner power is reported in tenths of a kW (raw 200 is 20.0 kW, checked against the app).
 - Changes are not pushed live; values are at most about a minute old.

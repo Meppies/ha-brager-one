@@ -139,7 +139,9 @@
         "name": "Operating state",
         "state": {
           "standby": "Standby",
-          "work": "Work"
+          "work": "Work",
+          "damping": "Damping",
+          "cleaning": "Cleaning"
         }
       },
       "active_alarms": {

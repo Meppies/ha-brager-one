@@ -59,7 +59,9 @@
       "operating_state": {
         "default": "mdi:fire",
         "state": {
-          "standby": "mdi:fire-off"
+          "standby": "mdi:fire-off",
+          "damping": "mdi:fire-alert",
+          "cleaning": "mdi:broom"
         }
       },
       "last_alarm": {
