@@ -244,3 +244,30 @@ async def test_history_refresh_schedule(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert history_calls() == 1
+
+
+async def test_alarm_texts_follow_language(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    issue_registry: ir.IssueRegistry,
+) -> None:
+    """Alarm descriptions come from the translation file of the HA language."""
+    hass.config.language = "nl"
+    mock_api(aioclient_mock, alarms=[54, 999])
+    await setup_integration(hass, mock_entry)
+
+    issue = issue_registry.async_get_issue(DOMAIN, f"active_alarm_{DEVID}")
+    assert issue is not None
+    assert issue.translation_placeholders["alarms"] == (
+        "Ontsteken mislukt, Onbekend alarm 999"
+    )
+    # Entity IDs follow the language too, so look the sensor up by unique ID.
+    from homeassistant.helpers import entity_registry as er
+
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{DEVID}_last_alarm"
+    )
+    assert entity_id == "sensor.pellet_stove_laatste_alarm"
+    last = hass.states.get(entity_id).attributes
+    assert last["description"] == "Ernstig alarm op afstand gereset door de gebruiker"

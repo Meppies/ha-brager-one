@@ -1,5 +1,5 @@
 /* BragerOne dashboard card, shipped with the brager_one integration. */
-const CARD_VERSION = "1.2.0";
+const CARD_VERSION = "1.2.1";
 const DOMAIN = "brager_one";
 
 const TEXT = {
@@ -40,6 +40,7 @@ const TEXT = {
     no_device: "Choose a BragerOne device in the card settings.",
     device: "Device",
     name: "Name (optional)",
+    card_description: "Pellet stove or boiler on BragerOne: temperatures, setpoints, pumps and alarms.",
   },
   nl: {
     boiler: "Ketel",
@@ -78,8 +79,20 @@ const TEXT = {
     no_device: "Kies een BragerOne-apparaat in de kaartinstellingen.",
     device: "Apparaat",
     name: "Naam (optioneel)",
+    card_description: "Pelletkachel of ketel via BragerOne: temperaturen, instellingen, pompen en alarmen.",
   },
 };
+
+// Language of the Home Assistant interface, before hass is available.
+function uiLanguage() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("selectedLanguage") || "null");
+    if (stored) return String(stored).split("-")[0];
+  } catch (err) {
+    // Storage can be unavailable; fall back to the browser language.
+  }
+  return (navigator.language || "en").split("-")[0];
+}
 
 // Alarm texts per language. English comes from the integration itself.
 const ALARM_TEXT = {
@@ -577,7 +590,7 @@ if (!customElements.get("brager-one-card")) {
   window.customCards.push({
     type: "brager-one-card",
     name: "BragerOne",
-    description: "Pellet stove or boiler on BragerOne: temperatures, setpoints, pumps and alarms.",
+    description: (TEXT[uiLanguage()] || TEXT.en).card_description,
     preview: true,
     documentationURL: "https://github.com/Meppies/ha-brager-one",
   });

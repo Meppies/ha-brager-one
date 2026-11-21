@@ -25,7 +25,7 @@ from homeassistant.util import dt as dt_util
 
 from .api import BragerOneSnapshot, ParameterValue
 from .const import OPERATING_STATES
-from .coordinator import BragerOneConfigEntry, BragerOneCoordinator, alarm_text
+from .coordinator import BragerOneConfigEntry, BragerOneCoordinator
 from .entity import BragerOneEntity
 
 PARALLEL_UPDATES = 0
@@ -196,10 +196,12 @@ class BragerOneOperatingStateSensor(BragerOneEntity, SensorEntity):
         return OPERATING_STATES.get(code)
 
 
-def _alarm_details(alarm: dict[str, Any]) -> dict[str, Any]:
+def _alarm_details(
+    snapshot: BragerOneSnapshot, alarm: dict[str, Any]
+) -> dict[str, Any]:
     return {
         "code": alarm["code"],
-        "description": alarm_text(alarm["code"]),
+        "description": snapshot.alarm_text(alarm["code"]),
         "started": alarm.get("started"),
         "ended": alarm.get("ended"),
     }
@@ -227,7 +229,10 @@ class BragerOneAlarmSensor(BragerOneEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the active alarms."""
-        return {"alarms": [_alarm_details(alarm) for alarm in self._snapshot.alarms]}
+        snapshot = self._snapshot
+        return {
+            "alarms": [_alarm_details(snapshot, alarm) for alarm in snapshot.alarms]
+        }
 
 
 class BragerOneLastAlarmSensor(BragerOneEntity, SensorEntity):
@@ -250,11 +255,12 @@ class BragerOneLastAlarmSensor(BragerOneEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the latest alarm and the ten most recent ones."""
-        history = self.coordinator.data.history
-        latest = _alarm_details(history[0]) if history else None
+        snapshot = self.coordinator.data
+        history = snapshot.history
+        latest = _alarm_details(snapshot, history[0]) if history else None
         return {
             "code": latest["code"] if latest else None,
             "description": latest["description"] if latest else None,
             "ended": latest["ended"] if latest else None,
-            "recent": [_alarm_details(alarm) for alarm in history[:10]],
+            "recent": [_alarm_details(snapshot, alarm) for alarm in history[:10]],
         }

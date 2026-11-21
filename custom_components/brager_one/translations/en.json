@@ -185,5 +185,41 @@
       "title": "{name} reports an alarm",
       "description": "The stove reports: {alarms}.\n\nCheck the stove and clear the alarm on the controller or in the BragerOne app. This message disappears when the alarm is gone."
     }
+  },
+  "selector": {
+    "alarm": {
+      "options": {
+        "0": "Boiler sensor fault",
+        "1": "Return sensor fault",
+        "2": "Hot water sensor fault",
+        "3": "Feeder sensor fault",
+        "4": "Outdoor sensor fault",
+        "5": "Mixing valve 1 sensor fault",
+        "6": "Buffer sensor (top) fault",
+        "7": "Flue gas sensor fault",
+        "8": "Fuel level sensor fault",
+        "13": "Flame sensor fault",
+        "15": "Fan speed sensor fault",
+        "18": "Buffer sensor (bottom) fault",
+        "23": "Boiler overheated",
+        "24": "Hot water overheated",
+        "25": "Feeder too hot (burn-back risk)",
+        "26": "Safety thermostat (STB) tripped",
+        "28": "Feeder blocked",
+        "30": "Flue gas too hot",
+        "31": "No draught (chimney or door open)",
+        "38": "Out of fuel",
+        "39": "Hopper lid open",
+        "44": "Fan fault",
+        "54": "Failure to fire up",
+        "55": "Interruption of power supply",
+        "56": "Start-up assistant required",
+        "57": "Service or inspection required",
+        "170": "Ash removal fault",
+        "500": "Serious alarm cleared remotely by the user",
+        "501": "Module not connected",
+        "unknown": "Unknown alarm {code}"
+      }
+    }
   }
 }

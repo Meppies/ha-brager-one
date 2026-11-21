@@ -53,6 +53,15 @@ class BragerOneSnapshot:
     pools: Pools = field(default_factory=dict)
     alarms: list[dict[str, Any]] = field(default_factory=list)
     history: list[dict[str, Any]] = field(default_factory=list)
+    alarm_texts: dict[str, str] = field(default_factory=dict)
+
+    def alarm_text(self, code: int) -> str:
+        """Return the alarm description in the Home Assistant language."""
+        if text := self.alarm_texts.get(str(code)):
+            return text
+        return self.alarm_texts.get("unknown", "Unknown alarm {code}").replace(
+            "{code}", str(code)
+        )
 
     def value(self, pool: str, key: str) -> ParameterValue | None:
         """Return a single parameter value, or None when it is missing."""

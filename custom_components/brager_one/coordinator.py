@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
@@ -21,7 +22,7 @@ from .api import (
     BragerOneSnapshot,
 )
 from .const import (
-    ALARM_DESCRIPTIONS,
+    ALARM_TRANSLATION_PREFIX,
     DOMAIN,
     HISTORY_INTERVAL,
     LOGGER,
@@ -44,11 +45,6 @@ type BragerOneConfigEntry = ConfigEntry[BragerOneRuntimeData]
 def alarm_issue_id(devid: str) -> str:
     """Return the repair issue id used for active alarms."""
     return f"active_alarm_{devid}"
-
-
-def alarm_text(code: int) -> str:
-    """Return a readable alarm description."""
-    return ALARM_DESCRIPTIONS.get(code, f"Unknown alarm {code}")
 
 
 class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
@@ -76,6 +72,23 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
         self._history: list[dict[str, Any]] = []
         self._history_fetched: datetime | None = None
         self._last_codes: list[int] | None = None
+        self._alarm_texts: dict[str, str] = {}
+        self._texts_language: str | None = None
+
+    async def _async_alarm_texts(self) -> dict[str, str]:
+        """Load the alarm texts for the current Home Assistant language."""
+        language = self.hass.config.language
+        if language != self._texts_language:
+            translations = await async_get_translations(
+                self.hass, language, "selector", {DOMAIN}
+            )
+            self._alarm_texts = {
+                key.removeprefix(ALARM_TRANSLATION_PREFIX): text
+                for key, text in translations.items()
+                if key.startswith(ALARM_TRANSLATION_PREFIX)
+            }
+            self._texts_language = language
+        return self._alarm_texts
 
     async def _async_fetch(self) -> BragerOneSnapshot:
         devid = self.module.devid
@@ -91,7 +104,12 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
             self._history = await self.client.async_get_alarm_history(devid)
             self._history_fetched = now
         self._last_codes = codes
-        return BragerOneSnapshot(pools=pools, alarms=alarms, history=self._history)
+        return BragerOneSnapshot(
+            pools=pools,
+            alarms=alarms,
+            history=self._history,
+            alarm_texts=await self._async_alarm_texts(),
+        )
 
     async def _async_update_data(self) -> BragerOneSnapshot:
         try:
@@ -115,7 +133,9 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
         if not snapshot.alarms:
             ir.async_delete_issue(self.hass, DOMAIN, issue_id)
             return
-        texts = ", ".join(alarm_text(alarm["code"]) for alarm in snapshot.alarms)
+        texts = ", ".join(
+            snapshot.alarm_text(alarm["code"]) for alarm in snapshot.alarms
+        )
         ir.async_create_issue(
             self.hass,
             DOMAIN,

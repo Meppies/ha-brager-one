@@ -185,5 +185,41 @@
       "title": "{name} meldt een alarm",
       "description": "De kachel meldt: {alarms}.\n\nControleer de kachel en reset het alarm op de regelaar of in de BragerOne-app. Deze melding verdwijnt zodra het alarm weg is."
     }
+  },
+  "selector": {
+    "alarm": {
+      "options": {
+        "0": "Ketelsensor defect",
+        "1": "Retoursensor defect",
+        "2": "Tapwatersensor defect",
+        "3": "Vijzelsensor defect",
+        "4": "Buitensensor defect",
+        "5": "Mengklep 1 sensor defect",
+        "6": "Buffersensor (boven) defect",
+        "7": "Rookgassensor defect",
+        "8": "Brandstofniveausensor defect",
+        "13": "Vlamsensor defect",
+        "15": "Ventilatortoerentalsensor defect",
+        "18": "Buffersensor (onder) defect",
+        "23": "Ketel oververhit",
+        "24": "Tapwater oververhit",
+        "25": "Vijzel te heet (terugbrandgevaar)",
+        "26": "Veiligheidsthermostaat (STB) aangesproken",
+        "28": "Vijzel geblokkeerd",
+        "30": "Rookgas te heet",
+        "31": "Geen trek (schoorsteen of deur open)",
+        "38": "Brandstof op",
+        "39": "Bunkerdeksel open",
+        "44": "Ventilatorstoring",
+        "54": "Ontsteken mislukt",
+        "55": "Stroomonderbreking",
+        "56": "Opstartassistent vereist",
+        "57": "Onderhoud of inspectie vereist",
+        "170": "Storing asafvoer",
+        "500": "Ernstig alarm op afstand gereset door de gebruiker",
+        "501": "Module niet verbonden",
+        "unknown": "Onbekend alarm {code}"
+      }
+    }
   }
 }
