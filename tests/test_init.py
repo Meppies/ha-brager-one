@@ -271,3 +271,28 @@ async def test_alarm_texts_follow_language(
     assert entity_id == "sensor.pellet_stove_laatste_alarm"
     last = hass.states.get(entity_id).attributes
     assert last["description"] == "Ernstig alarm op afstand gereset door de gebruiker"
+
+
+async def test_scan_interval_option(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+) -> None:
+    """The coordinator polls at the interval from the options."""
+    mock_entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(mock_entry, options={"scan_interval": 10})
+    mock_api(aioclient_mock)
+    await hass.config_entries.async_setup(mock_entry.entry_id)
+    await hass.async_block_till_done()
+    assert mock_entry.runtime_data.coordinator.update_interval == timedelta(seconds=10)
+
+
+async def test_default_scan_interval(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+) -> None:
+    """Without options the stove is polled every 60 seconds."""
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+    assert mock_entry.runtime_data.coordinator.update_interval == timedelta(seconds=60)

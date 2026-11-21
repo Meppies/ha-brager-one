@@ -16,7 +16,10 @@ API_BASE_URL: Final = "https://io.brager.pl/v1"
 WEB_ORIGIN: Final = "https://one.brager.pl"
 APP_VERSION: Final = "1.04.16"
 
-UPDATE_INTERVAL: Final = timedelta(seconds=60)
+# Polling interval in seconds; the user can change it in the options.
+DEFAULT_SCAN_INTERVAL: Final = 60
+MIN_SCAN_INTERVAL: Final = 10
+MAX_SCAN_INTERVAL: Final = 300
 # The alarm history is read less often; it is also re-read whenever the set of
 # active alarms changes.
 HISTORY_INTERVAL: Final = timedelta(minutes=10)

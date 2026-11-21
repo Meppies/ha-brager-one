@@ -33,7 +33,13 @@ Manual install: copy `custom_components/brager_one` into the `custom_components`
 | Password | The password of that account. Home Assistant stores it to renew the session when the cloud token expires. |
 | Module | Only asked when the account has more than one module. Each module becomes its own entry; add the others by running the flow again. |
 
-There are no options to set afterwards. To use another account or a new password, open the entry and choose **Reconfigure**. When BragerOne rejects the stored password, Home Assistant asks for the new one by itself.
+### Options
+
+| Option | Description |
+|---|---|
+| Polling interval | How often the stove is read from BragerOne, in seconds: 10 to 300, default 60. Open the entry and choose **Configure**. The integration reloads with the new interval. Short intervals send more requests to the BragerOne cloud. |
+
+To use another account or a new password, open the entry and choose **Reconfigure**. When BragerOne rejects the stored password, Home Assistant asks for the new one by itself.
 
 ## Entities
 
@@ -84,7 +90,7 @@ The card is removed from the dashboard resources when the last BragerOne entry i
 
 ## How data is updated
 
-The integration polls BragerOne every 60 seconds: one request for all parameters and one for active alarms. The alarm history is read every 10 minutes, and straight away when the set of active alarms changes. After you switch the boiler or change a setpoint, it polls again 5 seconds later. The entity shows the new value straight away and keeps it for up to 45 seconds while the cloud catches up.
+The integration polls BragerOne every 60 seconds by default (adjustable from 10 seconds to 5 minutes, see Options): one request for all parameters and one for active alarms. The alarm history is read every 10 minutes, and straight away when the set of active alarms changes. After you switch the boiler or change a setpoint, it polls again 5 seconds later. The entity shows the new value straight away and keeps it for up to 45 seconds while the cloud catches up.
 
 ## Use cases
 

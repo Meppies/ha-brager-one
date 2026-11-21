@@ -58,6 +58,20 @@
       "reconfigure_successful": "Account updated."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Polling interval",
+        "description": "How often Home Assistant reads the stove from BragerOne. Shorter intervals give fresher values but send more requests to the cloud.",
+        "data": {
+          "scan_interval": "Interval"
+        },
+        "data_description": {
+          "scan_interval": "In seconds, from 10 to 300. Default 60."
+        }
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "boiler_pump": {

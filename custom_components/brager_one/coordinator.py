@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import issue_registry as ir
@@ -23,10 +24,10 @@ from .api import (
 )
 from .const import (
     ALARM_TRANSLATION_PREFIX,
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     HISTORY_INTERVAL,
     LOGGER,
-    UPDATE_INTERVAL,
 )
 
 
@@ -65,7 +66,9 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
             LOGGER,
             config_entry=entry,
             name=f"{DOMAIN}_{module.devid}",
-            update_interval=UPDATE_INTERVAL,
+            update_interval=timedelta(
+                seconds=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            ),
         )
         self.client = client
         self.module = module

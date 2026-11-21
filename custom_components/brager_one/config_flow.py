@@ -5,10 +5,19 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithReload,
+)
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_SCAN_INTERVAL
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
@@ -25,7 +34,15 @@ from .api import (
     BragerOneConnectionError,
     BragerOneModule,
 )
-from .const import CONF_DEVID, CONF_OBJECT_ID, DOMAIN, LOGGER
+from .const import (
+    CONF_DEVID,
+    CONF_OBJECT_ID,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    LOGGER,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
+)
 
 CREDENTIALS_SCHEMA = vol.Schema(
     {
@@ -54,6 +71,12 @@ class BragerOneConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for BragerOne."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> BragerOneOptionsFlow:
+        """Return the options flow."""
+        return BragerOneOptionsFlow()
 
     def __init__(self) -> None:
         """Initialise the flow."""
@@ -201,4 +224,39 @@ class BragerOneConfigFlow(ConfigFlow, domain=DOMAIN):
                 user_input or {CONF_EMAIL: entry.data[CONF_EMAIL]},
             ),
             errors=errors,
+        )
+
+
+class BragerOneOptionsFlow(OptionsFlowWithReload):
+    """Let the user choose how often BragerOne is polled."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show the polling interval."""
+        if user_input is not None:
+            return self.async_create_entry(
+                data={CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL])}
+            )
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_SCAN_INTERVAL): NumberSelector(
+                    NumberSelectorConfig(
+                        min=MIN_SCAN_INTERVAL,
+                        max=MAX_SCAN_INTERVAL,
+                        step=5,
+                        mode=NumberSelectorMode.BOX,
+                        unit_of_measurement="s",
+                    )
+                )
+            }
+        )
+        current = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                schema, {CONF_SCAN_INTERVAL: current}
+            ),
         )

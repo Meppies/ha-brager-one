@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from homeassistant.config_entries import SOURCE_USER
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 import pytest
@@ -246,3 +246,23 @@ async def test_reconfigure_wrong_account(
     )
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "module_missing"
+
+
+async def test_options_flow_sets_interval(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+) -> None:
+    """The polling interval can be changed and defaults to 60 seconds."""
+    mock_entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(mock_entry.entry_id)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "init"
+    schema_default = next(iter(result["data_schema"].schema)).description
+    assert schema_default == {"suggested_value": 60}
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_SCAN_INTERVAL: 10.0}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert mock_entry.options == {CONF_SCAN_INTERVAL: 10}

@@ -58,6 +58,20 @@
       "reconfigure_successful": "Account bijgewerkt."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ophaalinterval",
+        "description": "Hoe vaak Home Assistant de kachel uitleest via BragerOne. Een korter interval geeft actuelere waarden, maar stuurt meer verzoeken naar de cloud.",
+        "data": {
+          "scan_interval": "Interval"
+        },
+        "data_description": {
+          "scan_interval": "In seconden, van 10 tot 300. Standaard 60."
+        }
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "boiler_pump": {
