@@ -6,11 +6,9 @@ from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .api import BragerOneError
-from .const import COMMAND_BOILER_START, COMMAND_BOILER_STOP, DOMAIN
+from .const import COMMAND_BOILER_START, COMMAND_BOILER_STOP
 from .coordinator import BragerOneConfigEntry, BragerOneCoordinator
 from .entity import BragerOneWritableEntity
 
@@ -49,24 +47,18 @@ class BragerOneBoilerSwitch(BragerOneWritableEntity, SwitchEntity):
         value: bool | None = self._current_value()
         return value
 
-    async def _async_send(self, on: bool) -> None:
-        command = COMMAND_BOILER_START if on else COMMAND_BOILER_STOP
-        try:
-            await self.coordinator.client.async_send_command(
-                self.coordinator.module.devid, command, 1 if on else 0
-            )
-        except BragerOneError as err:
-            raise HomeAssistantError(
-                translation_domain=DOMAIN,
-                translation_key="command_failed",
-                translation_placeholders={"error": str(err)},
-            ) from err
-        self._set_pending(on)
+    async def _async_write(self, value: Any) -> None:
+        on = bool(value)
+        await self.coordinator.client.async_send_command(
+            self.coordinator.module.devid,
+            COMMAND_BOILER_START if on else COMMAND_BOILER_STOP,
+            1 if on else 0,
+        )
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Start the boiler."""
-        await self._async_send(True)
+        await self._async_command(True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Stop the boiler."""
-        await self._async_send(False)
+        await self._async_command(False)

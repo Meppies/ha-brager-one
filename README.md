@@ -90,7 +90,9 @@ The card is removed from the dashboard resources when the last BragerOne entry i
 
 ## How data is updated
 
-The integration polls BragerOne every 60 seconds by default (adjustable from 10 seconds to 5 minutes, see Options): one request for all parameters and one for active alarms. The alarm history is read every 10 minutes, and straight away when the set of active alarms changes. After you switch the boiler or change a setpoint, it polls again 5 seconds later. The entity shows the new value straight away and keeps it for up to 45 seconds while the cloud catches up.
+The integration polls BragerOne every 60 seconds by default (adjustable from 10 seconds to 5 minutes, see Options): one request for all parameters and one for active alarms. The alarm history is read every 10 minutes, and straight away when the set of active alarms changes. After you switch the boiler or change a setpoint, it polls again 5 seconds later. The entity shows the new value straight away while the cloud catches up.
+
+Commands are sent one at a time, at least 5 seconds apart: a stop followed by a start three seconds later was seen to leave the stove off. Twenty seconds after a command the integration checks whether the stove has taken it over. If not, it sends the command once more and checks again after another twenty seconds. If the stove still has not followed, the entity shows the stove's own value again and a repair issue ("The stove did not follow a command") appears; it disappears after the next command the stove does follow.
 
 ## Use cases
 

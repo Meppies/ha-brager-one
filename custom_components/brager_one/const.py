@@ -26,9 +26,14 @@ HISTORY_INTERVAL: Final = timedelta(minutes=10)
 # BragerOne relays a command to the controller and back; the new value
 # usually shows up in the cloud a few seconds after the command returns.
 COMMAND_REFRESH_DELAY: Final = 5.0
-# How long an entity keeps showing the value it just wrote while the cloud
-# still reports the old one.
-PENDING_TIMEOUT: Final = timedelta(seconds=45)
+# Commands are sent one at a time and at least this many seconds apart: two
+# commands in quick succession (stop, then start three seconds later) were
+# seen to leave the stove in the state of the first one.
+COMMAND_MIN_GAP: Final = 5.0
+# When the stove has not taken over a written value after this many seconds,
+# the command is sent once more; if it still does not follow, a repair issue
+# is raised.
+COMMAND_VERIFY_DELAY: Final = 20.0
 
 # Raw module commands, as used by the BragerOne web app.
 COMMAND_BOILER_START: Final = "BOILER_START"

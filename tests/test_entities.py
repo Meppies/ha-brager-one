@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 import json
+from unittest.mock import AsyncMock
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.number import (
@@ -21,7 +22,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 import pytest
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
@@ -30,7 +31,7 @@ from pytest_homeassistant_custom_component.common import (
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.brager_one.binary_sensor import pump_running
-from custom_components.brager_one.const import API_BASE_URL
+from custom_components.brager_one.const import API_BASE_URL, DOMAIN
 
 from .conftest import DEVID, load, mock_api, setup_integration
 
@@ -163,6 +164,26 @@ def test_pump_running(value: object, expected: bool | None) -> None:
     assert pump_running(value) is expected  # type: ignore[arg-type]
 
 
+@pytest.fixture(autouse=True)
+def no_command_gap(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Do not wait between commands, except in the test about the gap."""
+    monkeypatch.setattr("custom_components.brager_one.coordinator.COMMAND_MIN_GAP", 0)
+
+
+def _raw_calls(aioclient_mock: AiohttpClientMocker) -> list[object]:
+    return [
+        c[2] for c in aioclient_mock.mock_calls if str(c[1]).endswith("/command/raw")
+    ]
+
+
+async def _tick(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, seconds: float
+) -> None:
+    freezer.tick(timedelta(seconds=seconds))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+
 async def test_switch(
     hass: HomeAssistant,
     aioclient_mock: AiohttpClientMocker,
@@ -175,34 +196,149 @@ async def test_switch(
 
     await hass.services.async_call(
         SWITCH_DOMAIN,
+        SERVICE_TURN_ON,
+        {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
+        blocking=True,
+    )
+    assert _raw_calls(aioclient_mock)[-1] == {
+        "command": "BOILER_START",
+        "devid": DEVID,
+        "value": 1,
+    }
+    # Confirmed by the cloud straight away: nothing is resent later.
+    await _tick(hass, freezer, 6)
+    await _tick(hass, freezer, 30)
+    assert len(_raw_calls(aioclient_mock)) == 1
+    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_ON
+
+
+async def test_switch_not_followed(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    freezer: FrozenDateTimeFactory,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A command the stove ignores is sent once more, then raises an issue."""
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
         SERVICE_TURN_OFF,
         {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
         blocking=True,
     )
-    raw = [c for c in aioclient_mock.mock_calls if str(c[1]).endswith("/command/raw")]
-    assert raw[-1][2] == {"command": "BOILER_STOP", "devid": DEVID, "value": 0}
+    assert _raw_calls(aioclient_mock) == [
+        {"command": "BOILER_STOP", "devid": DEVID, "value": 0}
+    ]
     # The cloud still says "on"; the switch keeps showing the command it sent.
-    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_OFF
-    await hass.async_block_till_done()
+    await _tick(hass, freezer, 6)
     assert hass.states.get("switch.pellet_stove_boiler").state == STATE_OFF
 
-    # After the pending window the cloud value wins again.
-    freezer.tick(timedelta(seconds=61))
-    async_fire_time_changed(hass)
-    await hass.async_block_till_done()
+    # Not followed after the verify delay: the command goes out once more.
+    await _tick(hass, freezer, 15)
+    assert len(_raw_calls(aioclient_mock)) == 2
+    assert "sending it again" in caplog.text
+    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_OFF
+
+    # Still not followed: give up, show the stove's state and raise an issue.
+    await _tick(hass, freezer, 21)
+    assert len(_raw_calls(aioclient_mock)) == 2
     assert hass.states.get("switch.pellet_stove_boiler").state == STATE_ON
+    issue_id = f"command_not_confirmed_{DEVID}"
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue is not None
+    assert issue.translation_placeholders == {
+        "entity": "switch.pellet_stove_boiler",
+        "value": "False",
+    }
 
+    # The next command the stove does follow clears the issue.
     await hass.services.async_call(
         SWITCH_DOMAIN,
         SERVICE_TURN_ON,
         {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
         blocking=True,
     )
-    raw = [c for c in aioclient_mock.mock_calls if str(c[1]).endswith("/command/raw")]
-    assert raw[-1][2] == {"command": "BOILER_START", "devid": DEVID, "value": 1}
-    await hass.async_block_till_done()
-    # Confirmed by the cloud straight away: pending state cleared.
-    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_ON
+    await _tick(hass, freezer, 6)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+
+
+async def test_switch_followed_late(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """A stove that catches up by the verify check gets no second command."""
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_OFF,
+        {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
+        blocking=True,
+    )
+    await _tick(hass, freezer, 6)
+    aioclient_mock.clear_requests()
+    mock_api(aioclient_mock, parameters=_params_with(P5={"s0": 0}))
+    await _tick(hass, freezer, 15)
+    assert _raw_calls(aioclient_mock) == []
+    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_OFF
+
+
+async def test_switch_resend_fails(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    freezer: FrozenDateTimeFactory,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A failing resend is logged and the check carries on."""
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+    await hass.services.async_call(
+        SWITCH_DOMAIN,
+        SERVICE_TURN_OFF,
+        {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
+        blocking=True,
+    )
+    aioclient_mock.clear_requests()
+    aioclient_mock.post(f"{API_BASE_URL}/module/command/raw", status=500)
+    mock_api(aioclient_mock)
+    await _tick(hass, freezer, 21)
+    assert "resending failed" in caplog.text
+    assert hass.states.get("switch.pellet_stove_boiler").state == STATE_OFF
+
+
+async def test_commands_are_spaced(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A command right after another one waits for the minimum gap."""
+    monkeypatch.setattr("custom_components.brager_one.coordinator.COMMAND_MIN_GAP", 5)
+    sleep = AsyncMock()
+    monkeypatch.setattr("custom_components.brager_one.coordinator.asyncio.sleep", sleep)
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+    for service in (SERVICE_TURN_OFF, SERVICE_TURN_ON):
+        await hass.services.async_call(
+            SWITCH_DOMAIN,
+            service,
+            {ATTR_ENTITY_ID: "switch.pellet_stove_boiler"},
+            blocking=True,
+        )
+    # The second command waited for the rest of the gap (asyncio.sleep is
+    # also used elsewhere, so look for this wait among all of them).
+    waits = [call.args[0] for call in sleep.await_args_list if call.args]
+    assert any(4 < wait <= 5 for wait in waits)
+    assert [c["command"] for c in _raw_calls(aioclient_mock)] == [  # type: ignore[index]
+        "BOILER_STOP",
+        "BOILER_START",
+    ]
 
 
 async def test_switch_command_fails(

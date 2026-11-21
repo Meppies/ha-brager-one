@@ -198,6 +198,10 @@
     }
   },
   "issues": {
+    "command_not_confirmed": {
+      "title": "The stove did not follow a command",
+      "description": "{entity} was set to {value}, but even after sending the command twice the stove still reports the old value.\n\nCheck the stove and the BragerOne app, then try again. This message disappears after the next command the stove does follow."
+    },
     "active_alarm": {
       "title": "{name} reports an alarm",
       "description": "The stove reports: {alarms}.\n\nCheck the stove and clear the alarm on the controller or in the BragerOne app. This message disappears when the alarm is gone."

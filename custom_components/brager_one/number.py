@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from homeassistant.components.number import (
     NumberDeviceClass,
@@ -12,10 +13,9 @@ from homeassistant.components.number import (
 )
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .api import BragerOneError
 from .const import DOMAIN
 from .coordinator import BragerOneConfigEntry, BragerOneCoordinator
 from .entity import BragerOneWritableEntity
@@ -131,19 +131,14 @@ class BragerOneSetpoint(BragerOneWritableEntity, NumberEntity):
                     "max": str(self.native_max_value),
                 },
             )
+        await self._async_command(float(round(value)))
+
+    async def _async_write(self, value: Any) -> None:
         unit = self.coordinator.data.value("P6", f"u{self.entity_description.index}")
-        try:
-            await self.coordinator.client.async_set_parameter(
-                self.coordinator.module.devid,
-                "P6",
-                self.entity_description.index,
-                int(round(value)),
-                unit if isinstance(unit, int) and not isinstance(unit, bool) else 0,
-            )
-        except BragerOneError as err:
-            raise HomeAssistantError(
-                translation_domain=DOMAIN,
-                translation_key="command_failed",
-                translation_placeholders={"error": str(err)},
-            ) from err
-        self._set_pending(float(round(value)))
+        await self.coordinator.client.async_set_parameter(
+            self.coordinator.module.devid,
+            "P6",
+            self.entity_description.index,
+            int(round(value)),
+            unit if isinstance(unit, int) and not isinstance(unit, bool) else 0,
+        )

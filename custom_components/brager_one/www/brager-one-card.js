@@ -1,5 +1,5 @@
 /* BragerOne dashboard card, shipped with the brager_one integration. */
-const CARD_VERSION = "1.3.2";
+const CARD_VERSION = "1.4.0";
 const DOMAIN = "brager_one";
 
 const TEXT = {

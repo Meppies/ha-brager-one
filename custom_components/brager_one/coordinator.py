@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -24,6 +26,7 @@ from .api import (
 )
 from .const import (
     ALARM_TRANSLATION_PREFIX,
+    COMMAND_MIN_GAP,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     HISTORY_INTERVAL,
@@ -46,6 +49,11 @@ type BragerOneConfigEntry = ConfigEntry[BragerOneRuntimeData]
 def alarm_issue_id(devid: str) -> str:
     """Return the repair issue id used for active alarms."""
     return f"active_alarm_{devid}"
+
+
+def command_issue_id(devid: str) -> str:
+    """Return the repair issue id used when the stove ignores a command."""
+    return f"command_not_confirmed_{devid}"
 
 
 class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
@@ -77,6 +85,20 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
         self._last_codes: list[int] | None = None
         self._alarm_texts: dict[str, str] = {}
         self._texts_language: str | None = None
+        self._command_lock = asyncio.Lock()
+        self._last_command: float | None = None
+
+    async def async_run_command(self, send: Callable[[], Awaitable[None]]) -> None:
+        """Send a command once the previous one is at least a few seconds old."""
+        async with self._command_lock:
+            if self._last_command is not None:
+                wait = self._last_command + COMMAND_MIN_GAP - self.hass.loop.time()
+                if wait > 0:
+                    await asyncio.sleep(wait)
+            try:
+                await send()
+            finally:
+                self._last_command = self.hass.loop.time()
 
     async def _async_alarm_texts(self) -> dict[str, str]:
         """Load the alarm texts for the current Home Assistant language."""

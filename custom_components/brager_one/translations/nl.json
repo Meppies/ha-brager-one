@@ -198,6 +198,10 @@
     }
   },
   "issues": {
+    "command_not_confirmed": {
+      "title": "De kachel heeft een commando niet uitgevoerd",
+      "description": "{entity} is op {value} gezet, maar ook na twee keer versturen meldt de kachel nog de oude waarde.\n\nControleer de kachel en de BragerOne-app en probeer het opnieuw. Deze melding verdwijnt na het volgende commando dat de kachel wel uitvoert."
+    },
     "active_alarm": {
       "title": "{name} meldt een alarm",
       "description": "De kachel meldt: {alarms}.\n\nControleer de kachel en reset het alarm op de regelaar of in de BragerOne-app. Deze melding verdwijnt zodra het alarm weg is."
