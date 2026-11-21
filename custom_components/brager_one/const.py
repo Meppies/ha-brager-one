@@ -35,11 +35,13 @@ COMMAND_BOILER_START: Final = "BOILER_START"
 COMMAND_BOILER_STOP: Final = "BOILER_STOP"
 
 # The operating state is bits 8-11 of status word P5 s5, matched against the
-# BragerOne app: cleaning 0x0100, work 0x5300, damping 0x0400, standby 0x0500.
+# BragerOne app: cleaning 0x0100, igniting 0x0200, work 0x5300, damping 0x0400,
+# standby 0x0500.
 # Codes not seen yet are reported as unknown, with the number in the
 # diagnostic code sensor.
 OPERATING_STATES: Final[dict[int, str]] = {
     1: "cleaning",
+    2: "igniting",
     3: "work",
     4: "damping",
     5: "standby",

@@ -141,7 +141,8 @@
           "standby": "Stand-by",
           "work": "In bedrijf",
           "damping": "Doven",
-          "cleaning": "Reinigen"
+          "cleaning": "Reinigen",
+          "igniting": "Ontsteken"
         }
       },
       "active_alarms": {

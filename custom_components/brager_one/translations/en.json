@@ -141,7 +141,8 @@
           "standby": "Standby",
           "work": "Work",
           "damping": "Damping",
-          "cleaning": "Cleaning"
+          "cleaning": "Cleaning",
+          "igniting": "Igniting"
         }
       },
       "active_alarms": {

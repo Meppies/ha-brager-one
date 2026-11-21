@@ -1,5 +1,5 @@
 /* BragerOne dashboard card, shipped with the brager_one integration. */
-const CARD_VERSION = "1.3.1";
+const CARD_VERSION = "1.3.2";
 const DOMAIN = "brager_one";
 
 const TEXT = {
@@ -28,6 +28,7 @@ const TEXT = {
     state_work: "Work",
     state_damping: "Damping",
     state_cleaning: "Cleaning",
+    state_igniting: "Igniting",
     state_code: "State code {code}",
     no_alarms: "No active alarms",
     active_alarm_one: "1 active alarm",
@@ -69,6 +70,7 @@ const TEXT = {
     state_work: "In bedrijf",
     state_damping: "Doven",
     state_cleaning: "Reinigen",
+    state_igniting: "Ontsteken",
     state_code: "Toestandscode {code}",
     no_alarms: "Geen actieve alarmen",
     active_alarm_one: "1 actief alarm",
@@ -269,7 +271,7 @@ class BragerOneCard extends HTMLElement {
     const code = this._state(map, "operating_state_code");
     let label;
     let icon = "mdi:help-circle-outline";
-    const icons = { work: "mdi:play-circle-outline", damping: "mdi:fire-alert", cleaning: "mdi:broom", standby: "mdi:pause-circle-outline" };
+    const icons = { work: "mdi:play-circle-outline", damping: "mdi:fire-alert", cleaning: "mdi:broom", igniting: "mdi:fire-circle", standby: "mdi:pause-circle-outline" };
     if (state && !["unknown", "unavailable"].includes(state.state)) {
       // Known states use the card's own text; any newer state the integration
       // adds is shown with Home Assistant's translation of the entity state.

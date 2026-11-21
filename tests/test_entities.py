@@ -317,7 +317,8 @@ async def test_diagnostics_redacts(
         (0x5300, ("work", "3.0")),
         (0x0400, ("damping", "4.0")),
         (0x0100, ("cleaning", "1.0")),
-        (0x0200, ("unknown", "2.0")),
+        (0x0200, ("igniting", "2.0")),
+        (0x0600, ("unknown", "6.0")),
         ("x", ("unknown", "unknown")),
     ],
 )

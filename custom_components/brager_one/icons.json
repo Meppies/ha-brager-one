@@ -61,7 +61,8 @@
         "state": {
           "standby": "mdi:fire-off",
           "damping": "mdi:fire-alert",
-          "cleaning": "mdi:broom"
+          "cleaning": "mdi:broom",
+          "igniting": "mdi:fire-circle"
         }
       },
       "last_alarm": {

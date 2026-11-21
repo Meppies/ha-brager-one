@@ -54,7 +54,7 @@ To use another account or a new password, open the entry and choose **Reconfigur
 | Flame brightness | sensor | P4 v13 (%) | enabled |
 | Burner power | sensor | P4 v14 (kW, reported in tenths) | enabled |
 | Blower output | sensor | P4 v15 (%) | enabled |
-| Operating state | sensor (enum) | bits 8-11 of P5 s5: `cleaning` (1), `work` (3), `damping` (4) or `standby` (5); unknown for other codes | enabled |
+| Operating state | sensor (enum) | bits 8-11 of P5 s5: `cleaning` (1), `igniting` (2), `work` (3), `damping` (4) or `standby` (5); unknown for other codes | enabled |
 | Active alarms | sensor | number of active alarms, with code, description, start and end as attributes | enabled |
 | Last alarm | sensor (timestamp) | start of the most recent alarm; attributes hold its code, description, end and the ten most recent alarms | enabled |
 | Operating state code | sensor (diagnostic) | the state number from P5 s5, also for states not named yet | enabled |
