@@ -13,6 +13,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import BragerOneAuthError, BragerOneClient, BragerOneError
+from .card import async_register_card, async_unregister_card
 from .const import CONF_DEVID, DOMAIN
 from .coordinator import (
     BragerOneConfigEntry,
@@ -64,6 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: BragerOneConfigEntry) ->
         client=client, module=module, coordinator=coordinator
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await async_register_card(hass)
     return True
 
 
@@ -73,5 +75,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: BragerOneConfigEntry) -
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: BragerOneConfigEntry) -> None:
-    """Clean up repair issues when the entry is removed."""
+    """Clean up the repair issue, and the card when no entry is left."""
     ir.async_delete_issue(hass, DOMAIN, alarm_issue_id(entry.data[CONF_DEVID]))
+    remaining = [
+        other
+        for other in hass.config_entries.async_entries(DOMAIN)
+        if other.entry_id != entry.entry_id
+    ]
+    if not remaining:
+        await async_unregister_card(hass)

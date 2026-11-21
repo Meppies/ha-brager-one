@@ -58,6 +58,28 @@ Disabled entities exist because many installations have no sensor connected to t
 
 While an alarm is active, a repair issue appears under **Settings → System → Repairs**. It disappears when the alarm is cleared.
 
+## Dashboard card
+
+The integration ships a card, so there is nothing extra to install. After setup it is registered as a dashboard resource and appears in the card picker as **BragerOne**.
+
+```yaml
+type: custom:brager-one-card
+device_id: <your BragerOne device>   # optional; the first BragerOne device is used when left out
+name: Pellet stove                   # optional
+```
+
+The card shows:
+
+- the boiler temperature with a bar towards the setpoint, and buttons to change the boiler and hot water setpoints (several taps are sent as one change);
+- the operating state and an on/off button. Starting or stopping the boiler needs a second tap within four seconds, so it cannot happen by accident;
+- return and feeder temperature, flame, blower and burner power;
+- the three pumps, each with a word (running or stopped) as well as an icon;
+- active alarms with ▲, or ✓ when there are none, and the most recent alarm. Alarm texts follow the dashboard language (English and Dutch).
+
+Tap any value to open its history. The card follows the Home Assistant theme, light and dark. States never rely on colour alone.
+
+The card is removed from the dashboard resources when the last BragerOne entry is deleted. Dashboards in YAML mode need the resource added by hand: `/brager_one/brager-one-card.js` as a JavaScript module.
+
 ## How data is updated
 
 The integration polls BragerOne every 60 seconds: one request for all parameters and one for active alarms. The alarm history is read every 10 minutes, and straight away when the set of active alarms changes. After you switch the boiler or change a setpoint, it polls again 5 seconds later. The entity shows the new value straight away and keeps it for up to 45 seconds while the cloud catches up.

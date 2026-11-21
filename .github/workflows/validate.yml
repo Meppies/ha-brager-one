@@ -41,3 +41,5 @@ jobs:
         run: pytest --cov --cov-report=term-missing --cov-fail-under=95
       - name: Types
         run: mypy
+      - name: Card syntax
+        run: node --check custom_components/brager_one/www/brager-one-card.js

@@ -1,16 +1,26 @@
 {
   "domain": "brager_one",
   "name": "BragerOne",
+  "after_dependencies": [
+    "frontend",
+    "lovelace"
+  ],
   "categories": ["climate.thermostats_heating", "climate.water_heaters"],
-  "codeowners": ["@Meppies"],
+  "codeowners": [
+    "@Meppies"
+  ],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": [
+    "http"
+  ],
   "documentation": "https://github.com/Meppies/ha-brager-one",
   "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Meppies/ha-brager-one/issues",
-  "loggers": ["custom_components.brager_one"],
+  "loggers": [
+    "custom_components.brager_one"
+  ],
   "quality_scale": "platinum",
   "requirements": [],
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

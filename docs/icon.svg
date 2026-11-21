@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2B3A42"/><stop offset="1" stop-color="#1B252B"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F4F6F7"/><stop offset="1" stop-color="#D5DCE0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.7" r="0.6">
+      <stop offset="0" stop-color="#FF8A1F" stop-opacity="0.55"/><stop offset="1" stop-color="#FF8A1F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <!-- chimney -->
+  <rect x="112" y="30" width="32" height="30" rx="5" fill="#AEB9BF"/>
+  <!-- stove body -->
+  <rect x="58" y="54" width="140" height="150" rx="22" fill="url(#body)"/>
+  <rect x="58" y="54" width="140" height="22" rx="11" fill="#C3CCD1"/>
+  <!-- legs -->
+  <rect x="72" y="200" width="18" height="20" rx="5" fill="#AEB9BF"/>
+  <rect x="166" y="200" width="18" height="20" rx="5" fill="#AEB9BF"/>
+  <!-- window -->
+  <rect x="78" y="88" width="100" height="92" rx="16" fill="#141B1F"/>
+  <rect x="78" y="88" width="100" height="92" rx="16" fill="url(#glow)"/>
+  <!-- flame -->
+  <path d="M128 98 C140 116 158 128 156 150 C154 168 142 176 128 176 C114 176 101 168 100 151 C99 138 106 129 112 122 C112 132 116 138 121 140 C118 124 120 110 128 98 Z" fill="#FF6D00"/>
+  <path d="M129 128 C136 138 145 146 143 158 C142 168 136 173 128 173 C120 173 114 168 114 159 C114 151 119 147 122 143 C123 149 126 152 129 153 C127 145 126 136 129 128 Z" fill="#FFC400"/>
+  <!-- pellets -->
+  <rect x="88" y="166" width="22" height="9" rx="4.5" fill="#C9A46E"/>
+  <rect x="146" y="166" width="22" height="9" rx="4.5" fill="#B8915A"/>
+  <!-- door handle -->
+  <rect x="184" y="118" width="6" height="32" rx="3" fill="#8C989F"/>
+</svg>
