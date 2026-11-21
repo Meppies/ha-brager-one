@@ -245,7 +245,7 @@ class BragerOneOptionsFlow(OptionsFlowWithReload):
                         min=MIN_SCAN_INTERVAL,
                         max=MAX_SCAN_INTERVAL,
                         step=5,
-                        mode=NumberSelectorMode.BOX,
+                        mode=NumberSelectorMode.SLIDER,
                         unit_of_measurement="s",
                     )
                 )

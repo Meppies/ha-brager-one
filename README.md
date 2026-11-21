@@ -37,7 +37,7 @@ Manual install: copy `custom_components/brager_one` into the `custom_components`
 
 | Option | Description |
 |---|---|
-| Polling interval | How often the stove is read from BragerOne, in seconds: 10 to 300, default 60. Open the entry and choose **Configure**. The integration reloads with the new interval. Short intervals send more requests to the BragerOne cloud. |
+| Polling interval | How often the stove is read from BragerOne, set with a slider in seconds: 10 to 300, default 60. Open the entry and choose **Configure**. The integration reloads with the new interval. Short intervals send more requests to the BragerOne cloud. |
 
 To use another account or a new password, open the entry and choose **Reconfigure**. When BragerOne rejects the stored password, Home Assistant asks for the new one by itself.
 
@@ -150,6 +150,7 @@ automation:
 - **"BragerOne rejected the email address or password"**: log in at [one.brager.pl](https://one.brager.pl) with the same details.
 - **Entities unavailable**: BragerOne could not be reached or returned an error. The log shows the reason once, and again when the connection recovers. Check whether the web app works.
 - **A setpoint jumps back**: the controller refused the value, or the stove is in a mode where it ignores remote changes. Check the same change in the BragerOne app.
+- **The card shows an old state or "State code" after an update**: the browser still runs the previous version of the card. Reload the page with the cache cleared (Ctrl+Shift+R, or in the companion app: Settings → Companion app → Debugging → Reset frontend cache). The browser console shows the loaded version as `BRAGER-ONE-CARD x.y.z`.
 - **Debug logging**:
 
   ```yaml

@@ -1,5 +1,5 @@
 /* BragerOne dashboard card, shipped with the brager_one integration. */
-const CARD_VERSION = "1.3.0";
+const CARD_VERSION = "1.3.1";
 const DOMAIN = "brager_one";
 
 const TEXT = {
@@ -270,9 +270,13 @@ class BragerOneCard extends HTMLElement {
     let label;
     let icon = "mdi:help-circle-outline";
     const icons = { work: "mdi:play-circle-outline", damping: "mdi:fire-alert", cleaning: "mdi:broom", standby: "mdi:pause-circle-outline" };
-    if (state && icons[state.state]) {
-      label = this._t(`state_${state.state}`);
-      icon = icons[state.state];
+    if (state && !["unknown", "unavailable"].includes(state.state)) {
+      // Known states use the card's own text; any newer state the integration
+      // adds is shown with Home Assistant's translation of the entity state.
+      label = TEXT.en[`state_${state.state}`]
+        ? this._t(`state_${state.state}`)
+        : this._hass.formatEntityState?.(state) ?? state.state;
+      icon = icons[state.state] || "mdi:information-outline";
     } else if (code && !["unknown", "unavailable"].includes(code.state)) {
       label = this._t("state_code", { code: this._number(code.state, 0) });
     } else {
