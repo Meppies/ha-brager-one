@@ -1,0 +1,23 @@
+{
+ "meta": {
+  "total": 1
+ },
+ "data": [
+  {
+   "devid": "ABCDEFGHIJ",
+   "name": "Pellet stove",
+   "gateway": {
+    "interface": "eth",
+    "version": "V2.09"
+   },
+   "devices": [
+    {
+     "dev_code": 7,
+     "manuf_code": 67,
+     "name": "HT Connect Tronic",
+     "sw_ver_txt": "HT Connect 2.09"
+    }
+   ]
+  }
+ ]
+}

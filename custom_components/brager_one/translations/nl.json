@@ -1,0 +1,123 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbinden met BragerOne",
+        "description": "Log in met het account dat je gebruikt op one.brager.pl of in de BragerOne-app.",
+        "data": {
+          "email": "E-mailadres",
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "email": "Het e-mailadres van je BragerOne-account.",
+          "password": "Het wachtwoord van je BragerOne-account. Het wordt in Home Assistant bewaard om de sessie te vernieuwen."
+        }
+      },
+      "module": {
+        "title": "Kies een module",
+        "description": "Je account heeft meer dan één module. Kies de module die je wilt toevoegen; de andere kun je daarna toevoegen.",
+        "data": {
+          "devid": "Module"
+        },
+        "data_description": {
+          "devid": "De BragerOne-module (regelaar) die je wilt toevoegen."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Opnieuw inloggen bij BragerOne",
+        "description": "BragerOne accepteert het opgeslagen wachtwoord voor {email} niet meer. Vul het huidige wachtwoord in.",
+        "data": {
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "password": "Het huidige wachtwoord van je BragerOne-account."
+        }
+      },
+      "reconfigure": {
+        "title": "BragerOne-account wijzigen",
+        "data": {
+          "email": "E-mailadres",
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "email": "Het e-mailadres van het BragerOne-account dat toegang heeft tot deze module.",
+          "password": "Het wachtwoord van dat account."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "BragerOne heeft het e-mailadres of wachtwoord geweigerd.",
+      "cannot_connect": "BragerOne is niet bereikbaar. Probeer het later opnieuw.",
+      "no_modules": "Dit account heeft geen modules.",
+      "unknown": "Onverwachte fout. Kijk in het Home Assistant-logboek."
+    },
+    "abort": {
+      "already_configured": "Alle modules van dit account zijn al toegevoegd.",
+      "module_missing": "Dit account heeft geen toegang tot de module van deze integratie.",
+      "reauth_successful": "Opnieuw ingelogd.",
+      "reconfigure_successful": "Account bijgewerkt."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "boiler_pump": { "name": "Ketelpomp" },
+      "return_pump": { "name": "Retourpomp" },
+      "hot_water_pump": { "name": "Tapwaterpomp" }
+    },
+    "number": {
+      "boiler_setpoint": { "name": "Keteltemperatuur instelling" },
+      "hot_water_setpoint": { "name": "Tapwatertemperatuur instelling" }
+    },
+    "sensor": {
+      "boiler_temperature": { "name": "Keteltemperatuur" },
+      "return_temperature": { "name": "Retourtemperatuur" },
+      "hot_water_temperature": { "name": "Tapwatertemperatuur" },
+      "feeder_temperature": { "name": "Vijzeltemperatuur" },
+      "outdoor_temperature": { "name": "Buitentemperatuur" },
+      "valve_1_temperature": { "name": "Mengklep 1 temperatuur" },
+      "buffer_temperature": { "name": "Buffervattemperatuur" },
+      "flue_gas_temperature": { "name": "Rookgastemperatuur" },
+      "fuel_level": { "name": "Brandstofniveau" },
+      "flame_brightness": { "name": "Vlamhelderheid" },
+      "burner_power": { "name": "Brandervermogen" },
+      "blower_output": { "name": "Ventilatorvermogen" },
+      "oxygen": { "name": "Zuurstof in rookgas" },
+      "operating_state_code": { "name": "Bedrijfstoestand (code)" },
+      "active_alarms": {
+        "name": "Actieve alarmen",
+        "state_attributes": {
+          "alarms": { "name": "Alarmen" }
+        }
+      }
+    },
+    "switch": {
+      "boiler": { "name": "Ketel" }
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "BragerOne heeft de opgeslagen inloggegevens geweigerd."
+    },
+    "cannot_connect": {
+      "message": "BragerOne is niet bereikbaar: {error}"
+    },
+    "update_failed": {
+      "message": "Kon de kachel niet uitlezen via BragerOne: {error}"
+    },
+    "module_not_found": {
+      "message": "Module {devid} zit niet meer in dit BragerOne-account."
+    },
+    "command_failed": {
+      "message": "BragerOne heeft het commando niet geaccepteerd: {error}"
+    },
+    "out_of_range": {
+      "message": "{value} valt buiten het bereik dat de regelaar accepteert ({min} tot {max})."
+    }
+  },
+  "issues": {
+    "active_alarm": {
+      "title": "{name} meldt een alarm",
+      "description": "De kachel meldt: {alarms}.\n\nControleer de kachel en reset het alarm op de regelaar of in de BragerOne-app. Deze melding verdwijnt zodra het alarm weg is."
+    }
+  }
+}

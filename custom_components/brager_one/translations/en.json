@@ -1,0 +1,123 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to BragerOne",
+        "description": "Sign in with the account you use on one.brager.pl or in the BragerOne app.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        },
+        "data_description": {
+          "email": "The email address of your BragerOne account.",
+          "password": "The password of your BragerOne account. It is stored in Home Assistant and used to renew the session."
+        }
+      },
+      "module": {
+        "title": "Choose a module",
+        "description": "Your account has more than one module. Choose the one to add; you can add the others afterwards.",
+        "data": {
+          "devid": "Module"
+        },
+        "data_description": {
+          "devid": "The BragerOne module (controller) to add."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in to BragerOne again",
+        "description": "BragerOne no longer accepts the stored password for {email}. Enter the current password.",
+        "data": {
+          "password": "Password"
+        },
+        "data_description": {
+          "password": "The current password of your BragerOne account."
+        }
+      },
+      "reconfigure": {
+        "title": "Change the BragerOne account",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        },
+        "data_description": {
+          "email": "The email address of the BragerOne account that has access to this module.",
+          "password": "The password of that account."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "BragerOne rejected the email address or password.",
+      "cannot_connect": "Could not reach BragerOne. Try again later.",
+      "no_modules": "This account has no modules.",
+      "unknown": "Unexpected error. Check the Home Assistant log."
+    },
+    "abort": {
+      "already_configured": "Every module of this account has already been added.",
+      "module_missing": "This account has no access to the module of this entry.",
+      "reauth_successful": "Signed in again.",
+      "reconfigure_successful": "Account updated."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "boiler_pump": { "name": "Boiler pump" },
+      "return_pump": { "name": "Return pump" },
+      "hot_water_pump": { "name": "Hot water pump" }
+    },
+    "number": {
+      "boiler_setpoint": { "name": "Boiler setpoint" },
+      "hot_water_setpoint": { "name": "Hot water setpoint" }
+    },
+    "sensor": {
+      "boiler_temperature": { "name": "Boiler temperature" },
+      "return_temperature": { "name": "Return temperature" },
+      "hot_water_temperature": { "name": "Hot water temperature" },
+      "feeder_temperature": { "name": "Feeder temperature" },
+      "outdoor_temperature": { "name": "Outdoor temperature" },
+      "valve_1_temperature": { "name": "Mixing valve 1 temperature" },
+      "buffer_temperature": { "name": "Buffer temperature" },
+      "flue_gas_temperature": { "name": "Flue gas temperature" },
+      "fuel_level": { "name": "Fuel level" },
+      "flame_brightness": { "name": "Flame brightness" },
+      "burner_power": { "name": "Burner power" },
+      "blower_output": { "name": "Blower output" },
+      "oxygen": { "name": "Oxygen in flue gas" },
+      "operating_state_code": { "name": "Operating state code" },
+      "active_alarms": {
+        "name": "Active alarms",
+        "state_attributes": {
+          "alarms": { "name": "Alarms" }
+        }
+      }
+    },
+    "switch": {
+      "boiler": { "name": "Boiler" }
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "BragerOne rejected the stored credentials."
+    },
+    "cannot_connect": {
+      "message": "Could not reach BragerOne: {error}"
+    },
+    "update_failed": {
+      "message": "Could not read the stove from BragerOne: {error}"
+    },
+    "module_not_found": {
+      "message": "Module {devid} is no longer in this BragerOne account."
+    },
+    "command_failed": {
+      "message": "BragerOne did not accept the command: {error}"
+    },
+    "out_of_range": {
+      "message": "{value} is outside the range the controller accepts ({min} to {max})."
+    }
+  },
+  "issues": {
+    "active_alarm": {
+      "title": "{name} reports an alarm",
+      "description": "The stove reports: {alarms}.\n\nCheck the stove and clear the alarm on the controller or in the BragerOne app. This message disappears when the alarm is gone."
+    }
+  }
+}
