@@ -52,6 +52,7 @@ class BragerOneSnapshot:
 
     pools: Pools = field(default_factory=dict)
     alarms: list[dict[str, Any]] = field(default_factory=list)
+    history: list[dict[str, Any]] = field(default_factory=list)
 
     def value(self, pool: str, key: str) -> ParameterValue | None:
         """Return a single parameter value, or None when it is missing."""
@@ -74,24 +75,31 @@ def parse_parameters(raw: dict[str, Any]) -> Pools:
 
 
 def normalise_alarms(raw: Any) -> list[dict[str, Any]]:
-    """Return alarms as a list of dicts with at least a numeric ``code``."""
+    """Return alarms as ``{"code", "started", "ended"}`` dicts.
+
+    BragerOne returns ``{"id", "devid", "created_at", "finished_at"}``; only
+    the code and the two timestamps are kept, so the module id never ends up
+    in attributes or diagnostics.
+    """
     if not isinstance(raw, list):
         return []
     alarms: list[dict[str, Any]] = []
     for item in raw:
-        if isinstance(item, dict):
-            code = item.get("id", item.get("code"))
-            entry = dict(item)
-        else:
-            code = item
-            entry = {}
+        data = item if isinstance(item, dict) else {}
+        code = data.get("id", data.get("code")) if data else item
         if isinstance(code, bool) or not isinstance(code, (int, str)):
             continue
         try:
-            entry["code"] = int(code)
+            number = int(code)
         except ValueError:
             continue
-        alarms.append(entry)
+        alarms.append(
+            {
+                "code": number,
+                "started": data.get("created_at"),
+                "ended": data.get("finished_at"),
+            }
+        )
     return alarms
 
 
@@ -278,11 +286,16 @@ class BragerOneClient:
         alarms = body.get("alarms") if isinstance(body, dict) else None
         return normalise_alarms(alarms)
 
-    async def async_get_snapshot(self, devid: str) -> BragerOneSnapshot:
-        """Return parameters and alarms in one go."""
-        pools = await self.async_get_parameters(devid)
-        alarms = await self.async_get_alarms(devid)
-        return BragerOneSnapshot(pools=pools, alarms=alarms)
+    async def async_get_alarm_history(self, devid: str) -> list[dict[str, Any]]:
+        """Return the most recent alarms (first page, newest first)."""
+        body = await self._request(
+            "POST",
+            "/modules/alarms/history",
+            json={"modules": [devid], "page": 1, "filters": {}},
+        )
+        root = body.get("alarms") if isinstance(body, dict) else None
+        items = root.get("data") if isinstance(root, dict) else root
+        return normalise_alarms(items)
 
     async def async_set_parameter(
         self, devid: str, pool: str, index: int, value: int, unit: int = 0

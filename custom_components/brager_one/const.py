@@ -17,6 +17,9 @@ WEB_ORIGIN: Final = "https://one.brager.pl"
 APP_VERSION: Final = "1.04.16"
 
 UPDATE_INTERVAL: Final = timedelta(seconds=60)
+# The alarm history is read less often; it is also re-read whenever the set of
+# active alarms changes.
+HISTORY_INTERVAL: Final = timedelta(minutes=10)
 # BragerOne relays a command to the controller and back; the new value
 # usually shows up in the cloud a few seconds after the command returns.
 COMMAND_REFRESH_DELAY: Final = 5.0
@@ -28,8 +31,16 @@ PENDING_TIMEOUT: Final = timedelta(seconds=45)
 COMMAND_BOILER_START: Final = "BOILER_START"
 COMMAND_BOILER_STOP: Final = "BOILER_STOP"
 
+# Operating state word P5 s10, as shown by the BragerOne app. Only the values
+# below have been seen; others are reported as unknown with the raw code.
+OPERATING_STATES: Final[dict[int, str]] = {
+    1: "standby",
+    3: "work",
+}
+
 # Alarm descriptions for the HT-Tronic / Brager controller family. The cloud
-# only returns the numeric code; these texts come from the controller manual.
+# only returns the numeric code. Codes 54, 55 and 500 use the wording of the
+# BragerOne app; the others come from the controller manual.
 ALARM_DESCRIPTIONS: Final[dict[int, str]] = {
     0: "Boiler sensor fault",
     1: "Return sensor fault",
@@ -53,11 +64,11 @@ ALARM_DESCRIPTIONS: Final[dict[int, str]] = {
     38: "Out of fuel",
     39: "Hopper lid open",
     44: "Fan fault",
-    54: "Ignition failed",
-    55: "Flame lost or power failure",
+    54: "Failure to fire up",
+    55: "Interruption of power supply",
     56: "Start-up assistant required",
     57: "Service or inspection required",
     170: "Ash removal fault",
-    500: "Alarm acknowledged manually",
+    500: "Serious alarm cleared remotely by the user",
     501: "Module not connected",
 }

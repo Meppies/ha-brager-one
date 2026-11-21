@@ -1,29 +1,78 @@
 {
   "entity": {
     "binary_sensor": {
-      "boiler_pump": { "default": "mdi:pump", "state": { "off": "mdi:pump-off" } },
-      "return_pump": { "default": "mdi:pump", "state": { "off": "mdi:pump-off" } },
-      "hot_water_pump": { "default": "mdi:water-pump", "state": { "off": "mdi:water-pump-off" } }
+      "boiler_pump": {
+        "default": "mdi:pump",
+        "state": {
+          "off": "mdi:pump-off"
+        }
+      },
+      "return_pump": {
+        "default": "mdi:pump",
+        "state": {
+          "off": "mdi:pump-off"
+        }
+      },
+      "hot_water_pump": {
+        "default": "mdi:water-pump",
+        "state": {
+          "off": "mdi:water-pump-off"
+        }
+      }
     },
     "number": {
-      "boiler_setpoint": { "default": "mdi:thermometer-water" },
-      "hot_water_setpoint": { "default": "mdi:water-thermometer" }
+      "boiler_setpoint": {
+        "default": "mdi:thermometer-water"
+      },
+      "hot_water_setpoint": {
+        "default": "mdi:water-thermometer"
+      }
     },
     "sensor": {
-      "feeder_temperature": { "default": "mdi:screw-machine-flat-top" },
-      "fuel_level": { "default": "mdi:silo" },
-      "flame_brightness": { "default": "mdi:fire" },
-      "burner_power": { "default": "mdi:fire-circle" },
-      "blower_output": { "default": "mdi:fan" },
-      "oxygen": { "default": "mdi:molecule" },
-      "operating_state_code": { "default": "mdi:state-machine" },
+      "feeder_temperature": {
+        "default": "mdi:screw-machine-flat-top"
+      },
+      "fuel_level": {
+        "default": "mdi:silo"
+      },
+      "flame_brightness": {
+        "default": "mdi:fire"
+      },
+      "burner_power": {
+        "default": "mdi:fire-circle"
+      },
+      "blower_output": {
+        "default": "mdi:fan"
+      },
+      "oxygen": {
+        "default": "mdi:molecule"
+      },
+      "operating_state_code": {
+        "default": "mdi:state-machine"
+      },
       "active_alarms": {
         "default": "mdi:alert-circle",
-        "range": { "0": "mdi:check-circle" }
+        "range": {
+          "0": "mdi:check-circle"
+        }
+      },
+      "operating_state": {
+        "default": "mdi:fire",
+        "state": {
+          "standby": "mdi:fire-off"
+        }
+      },
+      "last_alarm": {
+        "default": "mdi:history"
       }
     },
     "switch": {
-      "boiler": { "default": "mdi:fire", "state": { "off": "mdi:fire-off" } }
+      "boiler": {
+        "default": "mdi:fire",
+        "state": {
+          "off": "mdi:fire-off"
+        }
+      }
     }
   }
 }

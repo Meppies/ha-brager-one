@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -20,8 +21,10 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from .api import BragerOneSnapshot, ParameterValue
+from .const import OPERATING_STATES
 from .coordinator import BragerOneConfigEntry, BragerOneCoordinator, alarm_text
 from .entity import BragerOneEntity
 
@@ -124,7 +127,7 @@ SENSORS: tuple[BragerOneSensorDescription, ...] = (
         key="operating_state_code",
         translation_key="operating_state_code",
         pool="P5",
-        parameter="s3",
+        parameter="s10",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
@@ -143,7 +146,10 @@ async def async_setup_entry(
         for description in SENSORS
         if snapshot.value(description.pool, description.parameter) is not None
     ]
+    if snapshot.value("P5", "s10") is not None:
+        entities.append(BragerOneOperatingStateSensor(coordinator))
     entities.append(BragerOneAlarmSensor(coordinator))
+    entities.append(BragerOneLastAlarmSensor(coordinator))
     async_add_entities(entities)
 
 
@@ -170,6 +176,35 @@ class BragerOneSensor(BragerOneEntity, SensorEntity):
         )
 
 
+class BragerOneOperatingStateSensor(BragerOneEntity, SensorEntity):
+    """Operating state of the boiler, as the BragerOne app names it."""
+
+    _attr_translation_key = "operating_state"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = sorted(set(OPERATING_STATES.values()))
+
+    def __init__(self, coordinator: BragerOneCoordinator) -> None:
+        """Initialise the sensor."""
+        super().__init__(coordinator, "operating_state")
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the state, or None for a code that is not mapped yet."""
+        code = self.coordinator.data.value("P5", "s10")
+        if isinstance(code, bool) or not isinstance(code, int):
+            return None
+        return OPERATING_STATES.get(code)
+
+
+def _alarm_details(alarm: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "code": alarm["code"],
+        "description": alarm_text(alarm["code"]),
+        "started": alarm.get("started"),
+        "ended": alarm.get("ended"),
+    }
+
+
 class BragerOneAlarmSensor(BragerOneEntity, SensorEntity):
     """Number of active alarms, with their descriptions as attributes."""
 
@@ -192,9 +227,34 @@ class BragerOneAlarmSensor(BragerOneEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the active alarms."""
+        return {"alarms": [_alarm_details(alarm) for alarm in self._snapshot.alarms]}
+
+
+class BragerOneLastAlarmSensor(BragerOneEntity, SensorEntity):
+    """When the most recent alarm started, with the recent history attached."""
+
+    _attr_translation_key = "last_alarm"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, coordinator: BragerOneCoordinator) -> None:
+        """Initialise the sensor."""
+        super().__init__(coordinator, "last_alarm")
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return the start of the most recent alarm."""
+        history = self.coordinator.data.history
+        started = history[0].get("started") if history else None
+        return dt_util.parse_datetime(started) if isinstance(started, str) else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the latest alarm and the ten most recent ones."""
+        history = self.coordinator.data.history
+        latest = _alarm_details(history[0]) if history else None
         return {
-            "alarms": [
-                {"code": alarm["code"], "description": alarm_text(alarm["code"])}
-                for alarm in self._snapshot.alarms
-            ]
+            "code": latest["code"] if latest else None,
+            "description": latest["description"] if latest else None,
+            "ended": latest["ended"] if latest else None,
+            "recent": [_alarm_details(alarm) for alarm in history[:10]],
         }

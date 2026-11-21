@@ -1,0 +1,11 @@
+{
+ "status": "SUCCESS",
+ "alarms": {
+  "meta": {},
+  "data": [
+   {"id": 500, "devid": "ABCDEFGHIJ", "created_at": "2026-11-16T20:55:30.000000Z", "finished_at": "2026-11-16T21:04:27.000000Z"},
+   {"id": 54, "devid": "ABCDEFGHIJ", "created_at": "2026-11-16T20:55:30.000000Z", "finished_at": "2026-11-16T21:04:26.000000Z"},
+   {"id": 55, "devid": "ABCDEFGHIJ", "created_at": "2026-04-19T18:53:19.000000Z", "finished_at": null}
+  ]
+ }
+}

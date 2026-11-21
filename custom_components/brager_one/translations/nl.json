@@ -60,38 +60,104 @@
   },
   "entity": {
     "binary_sensor": {
-      "boiler_pump": { "name": "Ketelpomp" },
-      "return_pump": { "name": "Retourpomp" },
-      "hot_water_pump": { "name": "Tapwaterpomp" }
+      "boiler_pump": {
+        "name": "Ketelpomp"
+      },
+      "return_pump": {
+        "name": "Retourpomp"
+      },
+      "hot_water_pump": {
+        "name": "Tapwaterpomp"
+      }
     },
     "number": {
-      "boiler_setpoint": { "name": "Keteltemperatuur instelling" },
-      "hot_water_setpoint": { "name": "Tapwatertemperatuur instelling" }
+      "boiler_setpoint": {
+        "name": "Keteltemperatuur instelling"
+      },
+      "hot_water_setpoint": {
+        "name": "Tapwatertemperatuur instelling"
+      }
     },
     "sensor": {
-      "boiler_temperature": { "name": "Keteltemperatuur" },
-      "return_temperature": { "name": "Retourtemperatuur" },
-      "hot_water_temperature": { "name": "Tapwatertemperatuur" },
-      "feeder_temperature": { "name": "Vijzeltemperatuur" },
-      "outdoor_temperature": { "name": "Buitentemperatuur" },
-      "valve_1_temperature": { "name": "Mengklep 1 temperatuur" },
-      "buffer_temperature": { "name": "Buffervattemperatuur" },
-      "flue_gas_temperature": { "name": "Rookgastemperatuur" },
-      "fuel_level": { "name": "Brandstofniveau" },
-      "flame_brightness": { "name": "Vlamhelderheid" },
-      "burner_power": { "name": "Brandervermogen" },
-      "blower_output": { "name": "Ventilatorvermogen" },
-      "oxygen": { "name": "Zuurstof in rookgas" },
-      "operating_state_code": { "name": "Bedrijfstoestand (code)" },
+      "boiler_temperature": {
+        "name": "Keteltemperatuur"
+      },
+      "return_temperature": {
+        "name": "Retourtemperatuur"
+      },
+      "hot_water_temperature": {
+        "name": "Tapwatertemperatuur"
+      },
+      "feeder_temperature": {
+        "name": "Vijzeltemperatuur"
+      },
+      "outdoor_temperature": {
+        "name": "Buitentemperatuur"
+      },
+      "valve_1_temperature": {
+        "name": "Mengklep 1 temperatuur"
+      },
+      "buffer_temperature": {
+        "name": "Buffervattemperatuur"
+      },
+      "flue_gas_temperature": {
+        "name": "Rookgastemperatuur"
+      },
+      "fuel_level": {
+        "name": "Brandstofniveau"
+      },
+      "flame_brightness": {
+        "name": "Vlamhelderheid"
+      },
+      "burner_power": {
+        "name": "Brandervermogen"
+      },
+      "blower_output": {
+        "name": "Ventilatorvermogen"
+      },
+      "oxygen": {
+        "name": "Zuurstof in rookgas"
+      },
+      "operating_state_code": {
+        "name": "Bedrijfstoestand (code)"
+      },
+      "operating_state": {
+        "name": "Bedrijfstoestand",
+        "state": {
+          "standby": "Stand-by",
+          "work": "In bedrijf"
+        }
+      },
       "active_alarms": {
         "name": "Actieve alarmen",
         "state_attributes": {
-          "alarms": { "name": "Alarmen" }
+          "alarms": {
+            "name": "Alarmen"
+          }
+        }
+      },
+      "last_alarm": {
+        "name": "Laatste alarm",
+        "state_attributes": {
+          "code": {
+            "name": "Code"
+          },
+          "description": {
+            "name": "Omschrijving"
+          },
+          "ended": {
+            "name": "Beëindigd"
+          },
+          "recent": {
+            "name": "Recente alarmen"
+          }
         }
       }
     },
     "switch": {
-      "boiler": { "name": "Ketel" }
+      "boiler": {
+        "name": "Ketel"
+      }
     }
   },
   "exceptions": {

@@ -66,6 +66,7 @@ def mock_api(
     *,
     parameters: Any = None,
     alarms: Any = None,
+    history: Any = None,
     modules: Any = None,
     login_status: int = 200,
 ) -> None:
@@ -84,6 +85,10 @@ def mock_api(
     aioclient_mock.post(
         f"{API_BASE_URL}/modules/alarms",
         json={"status": "SUCCESS", "alarms": alarms if alarms is not None else []},
+    )
+    aioclient_mock.post(
+        f"{API_BASE_URL}/modules/alarms/history",
+        json=history if history is not None else load("alarm_history.json"),
     )
     aioclient_mock.post(f"{API_BASE_URL}/module/command", json={"status": "SUCCESS"})
     aioclient_mock.post(

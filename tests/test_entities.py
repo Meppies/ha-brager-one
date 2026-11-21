@@ -58,7 +58,9 @@ async def test_sensors(
         "sensor.pellet_stove_flame_brightness": "0.0",
         "sensor.pellet_stove_burner_power": "12.5",
         "sensor.pellet_stove_blower_output": "40.0",
-        "sensor.pellet_stove_operating_state_code": "4.0",
+        "sensor.pellet_stove_operating_state_code": "1.0",
+        "sensor.pellet_stove_operating_state": "standby",
+        "sensor.pellet_stove_last_alarm": "2026-11-16T20:55:30+00:00",
         "sensor.pellet_stove_active_alarms": "0",
         "binary_sensor.pellet_stove_boiler_pump": STATE_ON,
         "binary_sensor.pellet_stove_return_pump": STATE_ON,
@@ -69,6 +71,13 @@ async def test_sensors(
     }
     for entity_id, state in expected.items():
         assert hass.states.get(entity_id).state == state, entity_id
+
+    last = hass.states.get("sensor.pellet_stove_last_alarm").attributes
+    assert last["code"] == 500
+    assert last["description"] == "Serious alarm cleared remotely by the user"
+    assert last["ended"] == "2026-11-16T21:04:27.000000Z"
+    assert [a["code"] for a in last["recent"]] == [500, 54, 55]
+    assert last["recent"][2]["ended"] is None
 
     setpoint = hass.states.get("number.pellet_stove_boiler_setpoint")
     assert setpoint.attributes["min"] == 65
@@ -92,9 +101,17 @@ async def test_sensor_odd_values(
     """Non-numeric values give an unknown state instead of an error."""
     mock_api(
         aioclient_mock,
-        parameters=_params_with(P4={"v0": "n/a", "v14": True}, P5={"s0": "x"}),
+        parameters=_params_with(
+            P4={"v0": "n/a", "v14": True}, P5={"s0": "x", "s10": 7}
+        ),
+        history={"alarms": {"data": []}},
     )
     await setup_integration(hass, mock_entry)
+    assert hass.states.get("sensor.pellet_stove_operating_state").state == "unknown"
+    last = hass.states.get("sensor.pellet_stove_last_alarm")
+    assert last.state == "unknown"
+    assert last.attributes["recent"] == []
+    assert last.attributes["code"] is None
     assert hass.states.get("sensor.pellet_stove_boiler_temperature").state == "unknown"
     assert hass.states.get("sensor.pellet_stove_burner_power").state == "unknown"
     assert hass.states.get("switch.pellet_stove_boiler").state == "unknown"

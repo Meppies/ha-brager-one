@@ -60,38 +60,104 @@
   },
   "entity": {
     "binary_sensor": {
-      "boiler_pump": { "name": "Boiler pump" },
-      "return_pump": { "name": "Return pump" },
-      "hot_water_pump": { "name": "Hot water pump" }
+      "boiler_pump": {
+        "name": "Boiler pump"
+      },
+      "return_pump": {
+        "name": "Return pump"
+      },
+      "hot_water_pump": {
+        "name": "Hot water pump"
+      }
     },
     "number": {
-      "boiler_setpoint": { "name": "Boiler setpoint" },
-      "hot_water_setpoint": { "name": "Hot water setpoint" }
+      "boiler_setpoint": {
+        "name": "Boiler setpoint"
+      },
+      "hot_water_setpoint": {
+        "name": "Hot water setpoint"
+      }
     },
     "sensor": {
-      "boiler_temperature": { "name": "Boiler temperature" },
-      "return_temperature": { "name": "Return temperature" },
-      "hot_water_temperature": { "name": "Hot water temperature" },
-      "feeder_temperature": { "name": "Feeder temperature" },
-      "outdoor_temperature": { "name": "Outdoor temperature" },
-      "valve_1_temperature": { "name": "Mixing valve 1 temperature" },
-      "buffer_temperature": { "name": "Buffer temperature" },
-      "flue_gas_temperature": { "name": "Flue gas temperature" },
-      "fuel_level": { "name": "Fuel level" },
-      "flame_brightness": { "name": "Flame brightness" },
-      "burner_power": { "name": "Burner power" },
-      "blower_output": { "name": "Blower output" },
-      "oxygen": { "name": "Oxygen in flue gas" },
-      "operating_state_code": { "name": "Operating state code" },
+      "boiler_temperature": {
+        "name": "Boiler temperature"
+      },
+      "return_temperature": {
+        "name": "Return temperature"
+      },
+      "hot_water_temperature": {
+        "name": "Hot water temperature"
+      },
+      "feeder_temperature": {
+        "name": "Feeder temperature"
+      },
+      "outdoor_temperature": {
+        "name": "Outdoor temperature"
+      },
+      "valve_1_temperature": {
+        "name": "Mixing valve 1 temperature"
+      },
+      "buffer_temperature": {
+        "name": "Buffer temperature"
+      },
+      "flue_gas_temperature": {
+        "name": "Flue gas temperature"
+      },
+      "fuel_level": {
+        "name": "Fuel level"
+      },
+      "flame_brightness": {
+        "name": "Flame brightness"
+      },
+      "burner_power": {
+        "name": "Burner power"
+      },
+      "blower_output": {
+        "name": "Blower output"
+      },
+      "oxygen": {
+        "name": "Oxygen in flue gas"
+      },
+      "operating_state_code": {
+        "name": "Operating state code"
+      },
+      "operating_state": {
+        "name": "Operating state",
+        "state": {
+          "standby": "Standby",
+          "work": "Work"
+        }
+      },
       "active_alarms": {
         "name": "Active alarms",
         "state_attributes": {
-          "alarms": { "name": "Alarms" }
+          "alarms": {
+            "name": "Alarms"
+          }
+        }
+      },
+      "last_alarm": {
+        "name": "Last alarm",
+        "state_attributes": {
+          "code": {
+            "name": "Code"
+          },
+          "description": {
+            "name": "Description"
+          },
+          "ended": {
+            "name": "Ended"
+          },
+          "recent": {
+            "name": "Recent alarms"
+          }
         }
       }
     },
     "switch": {
-      "boiler": { "name": "Boiler" }
+      "boiler": {
+        "name": "Boiler"
+      }
     }
   },
   "exceptions": {

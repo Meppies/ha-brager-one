@@ -102,7 +102,9 @@ async def test_refresh_on_401() -> None:
         (200, {"status": "SUCCESS", "alarms": [7]}),
     )
     api = client(session)
-    assert await api.async_get_alarms("D") == [{"code": 7}]
+    assert await api.async_get_alarms("D") == [
+        {"code": 7, "started": None, "ended": None}
+    ]
     paths = [c[1] for c in session.calls]
     assert paths == [
         "/auth/user",
@@ -222,7 +224,36 @@ def test_parse_parameters() -> None:
 
 def test_normalise_alarms() -> None:
     assert normalise_alarms(None) == []
-    assert normalise_alarms([{"code": "38"}, {"id": None}, 54]) == [
-        {"code": 38},
-        {"code": 54},
+    assert normalise_alarms(
+        [
+            {"code": "38"},
+            {"id": None},
+            54,
+            "x",
+            {"id": 55, "devid": "D", "created_at": "t1", "finished_at": None},
+        ]
+    ) == [
+        {"code": 38, "started": None, "ended": None},
+        {"code": 54, "started": None, "ended": None},
+        {"code": 55, "started": "t1", "ended": None},
     ]
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ({"alarms": {"data": [{"id": 54, "created_at": "t"}]}}, [54]),
+        ({"alarms": [{"id": 55}]}, [55]),
+        ({"alarms": None}, []),
+        (None, []),
+    ],
+)
+async def test_alarm_history_shapes(body: Any, expected: list[int]) -> None:
+    session = FakeSession(TOKENS, (200, body))
+    history = await client(session).async_get_alarm_history("D")
+    assert [alarm["code"] for alarm in history] == expected
+    assert session.calls[1][2]["json"] == {
+        "modules": ["D"],
+        "page": 1,
+        "filters": {},
+    }

@@ -147,13 +147,18 @@ async def test_alarm_repair_issue(
     assert issue is not None
     assert issue.translation_placeholders == {
         "name": "Pellet stove",
-        "alarms": "Out of fuel, Ignition failed",
+        "alarms": "Out of fuel, Failure to fire up",
     }
     state = hass.states.get("sensor.pellet_stove_active_alarms")
     assert state.state == "2"
     assert state.attributes["alarms"] == [
-        {"code": 38, "description": "Out of fuel"},
-        {"code": 54, "description": "Ignition failed"},
+        {"code": 38, "description": "Out of fuel", "started": None, "ended": None},
+        {
+            "code": 54,
+            "description": "Failure to fire up",
+            "started": None,
+            "ended": None,
+        },
     ]
 
     aioclient_mock.clear_requests()
@@ -199,3 +204,43 @@ async def test_device_info(
     assert device.hw_version == "V2.09"
     assert device.model == "HT Connect Tronic"
     assert load("parameters.json")[DEVID]["P4"]["v0"]["value"] == 78
+
+
+async def test_history_refresh_schedule(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_entry: MockConfigEntry,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """History is read at start, every ten minutes and when alarms change."""
+
+    def history_calls() -> int:
+        return sum(
+            1 for call in aioclient_mock.mock_calls if str(call[1]).endswith("/history")
+        )
+
+    mock_api(aioclient_mock)
+    await setup_integration(hass, mock_entry)
+    assert history_calls() == 1
+
+    # A normal poll with unchanged alarms does not read the history.
+    freezer.tick(timedelta(seconds=61))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert history_calls() == 1
+
+    # A new active alarm triggers a history read.
+    aioclient_mock.clear_requests()
+    mock_api(aioclient_mock, alarms=[54])
+    freezer.tick(timedelta(seconds=61))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert history_calls() == 1
+
+    # Ten minutes later it is read again even without a change.
+    aioclient_mock.clear_requests()
+    mock_api(aioclient_mock, alarms=[54])
+    freezer.tick(timedelta(minutes=10))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    assert history_calls() == 1

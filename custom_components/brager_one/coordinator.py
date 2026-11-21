@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import (
     BragerOneAuthError,
@@ -17,7 +20,13 @@ from .api import (
     BragerOneModule,
     BragerOneSnapshot,
 )
-from .const import ALARM_DESCRIPTIONS, DOMAIN, LOGGER, UPDATE_INTERVAL
+from .const import (
+    ALARM_DESCRIPTIONS,
+    DOMAIN,
+    HISTORY_INTERVAL,
+    LOGGER,
+    UPDATE_INTERVAL,
+)
 
 
 @dataclass(slots=True)
@@ -64,10 +73,29 @@ class BragerOneCoordinator(DataUpdateCoordinator[BragerOneSnapshot]):
         )
         self.client = client
         self.module = module
+        self._history: list[dict[str, Any]] = []
+        self._history_fetched: datetime | None = None
+        self._last_codes: list[int] | None = None
+
+    async def _async_fetch(self) -> BragerOneSnapshot:
+        devid = self.module.devid
+        pools = await self.client.async_get_parameters(devid)
+        alarms = await self.client.async_get_alarms(devid)
+        codes = sorted(alarm["code"] for alarm in alarms)
+        now = dt_util.utcnow()
+        if (
+            self._history_fetched is None
+            or codes != self._last_codes
+            or now - self._history_fetched >= HISTORY_INTERVAL
+        ):
+            self._history = await self.client.async_get_alarm_history(devid)
+            self._history_fetched = now
+        self._last_codes = codes
+        return BragerOneSnapshot(pools=pools, alarms=alarms, history=self._history)
 
     async def _async_update_data(self) -> BragerOneSnapshot:
         try:
-            snapshot = await self.client.async_get_snapshot(self.module.devid)
+            snapshot = await self._async_fetch()
         except BragerOneAuthError as err:
             raise ConfigEntryAuthFailed(
                 translation_domain=DOMAIN, translation_key="auth_failed"
